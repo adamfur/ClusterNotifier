@@ -24,7 +24,7 @@ namespace Notifier
         {
             DateTime deadline = SystemTime.Now.Add(argTimeout);
 
-            Console.WriteLine("Set interrupt: " + deadline);
+            //Console.WriteLine("Set interrupt: " + deadline);
             lock (_interruptTable)
             {
                 _interruptTable.Enqueue(deadline, deadline);
@@ -63,7 +63,7 @@ namespace Notifier
 
                     Wait(timeSpan);
                     _logic.Interrupt();
-                    Console.WriteLine("[interrupt]");
+                    //Console.WriteLine("[interrupt]");
                 }
                 catch (ThreadInterruptedException)
                 {

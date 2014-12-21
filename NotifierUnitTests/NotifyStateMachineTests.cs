@@ -95,7 +95,7 @@ namespace NotifierUnitTests
         [Test]
         public void Trigger_IsTryPromoteToMaster_ExpectedResult()
         {
-            _machine.PromoteToMasterTimer = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat));
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat));
             _machine.State = NotifyState.TryPromoteToMaster;
 
             _machine.Trigger();
@@ -120,7 +120,7 @@ namespace NotifierUnitTests
         [Test]
         public void Trigger_IsSlave_ExpectedResult()
         {
-            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondToWaitBetweenPreliminaryMasterAndMaster));
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat));
             _machine.State = NotifyState.Slave;
 
             _machine.Trigger();
@@ -145,7 +145,7 @@ namespace NotifierUnitTests
         [Test]
         public void Trigger_IsTryPromoteToMaster_ExpectedResult2()
         {
-            _machine.PromoteToMasterTimer = SystemTime.Now;
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat)).AddSeconds(1);
             _machine.State = NotifyState.TryPromoteToMaster;
 
             _machine.Trigger();
@@ -158,20 +158,19 @@ namespace NotifierUnitTests
         [Test]
         public void Trigger_IsMaster_ExpectedResult2()
         {
-            _machine.LastHeartbeat = SystemTime.Now;
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondsBetweenHeartbeats)).AddSeconds(1);
             _machine.State = NotifyState.Master;
 
             _machine.Trigger();
 
             Assert.That(_machine.State, Is.EqualTo(NotifyState.Master));
-            Assert.That(_machine.LastHeartbeat, Is.EqualTo(_now));
             _watchdog.DidNotReceive().SetTimeout(TimeSpan.FromSeconds(NotifyStateMachine.SecondsBetweenHeartbeats));
         }
 
         [Test]
         public void Trigger_IsSlave_ExpectedResult2()
         {
-            _machine.LastHeartbeat = SystemTime.Now;
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondToWaitBetweenPreliminaryMasterAndMaster)).AddSeconds(1);
             _machine.State = NotifyState.Slave;
 
             _machine.Trigger();
@@ -183,7 +182,7 @@ namespace NotifierUnitTests
         [Test]
         public void Trigger_IsPreliminaryMaster_ExpectedResult2()
         {
-            _machine.LastHeartbeat = SystemTime.Now;
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondsBetweenHeartbeats)).AddSeconds(1);
             _machine.State = NotifyState.PreliminaryMaster;
 
             _machine.Trigger();
