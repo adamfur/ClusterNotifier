@@ -13,9 +13,9 @@ namespace Notifier
         public DateTime StateTimestamp { get; set; }
         public DateTime LastHeartbeat { get; set; }
 
-        private const int SecondToWaitBetweenPreliminaryMasterAndMaster = 5;
-        private const int SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat = 10;
-        private const int SecondsBetweenHeartbeats = 3;
+        public const int SecondToWaitBetweenPreliminaryMasterAndMaster = 5;
+        public const int SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat = 10;
+        public const int SecondsBetweenHeartbeats = 3;
 
         public NotifyStateMachine(IWatchdog argWatchdog, Action argAction, INotifyClient argClient, int argRoll)
         {

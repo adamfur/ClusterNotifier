@@ -13,10 +13,6 @@ namespace NotifierUnitTests
         private IWatchdog _watchdog;
         private INotifyClient _client;
 
-        private const int ClaimMasterDelay = 5;
-        private const int WaitSecondsIfNoHeartbeats = 10;
-        private const int HeartbeatDelay = 3;
-
         [SetUp]
         public void SetUp()
         {
@@ -34,7 +30,7 @@ namespace NotifierUnitTests
 
             Assert.That(_machine.LastHeartbeat, Is.EqualTo(_now));
 
-            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(WaitSecondsIfNoHeartbeats));
+            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(NotifyStateMachine.SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat));
         }
 
         [Test]
@@ -46,7 +42,7 @@ namespace NotifierUnitTests
 
             Assert.That(_machine.State, Is.EqualTo(NotifyState.Slave));
 
-            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(WaitSecondsIfNoHeartbeats));
+            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(NotifyStateMachine.SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat));
         }
 
         [Test]
@@ -57,7 +53,7 @@ namespace NotifierUnitTests
             _machine.Heartbeat(new NotifyMessage { Started = 3 });
 
             Assert.That(_machine.State, Is.EqualTo(NotifyState.Slave));
-            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(WaitSecondsIfNoHeartbeats));
+            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(NotifyStateMachine.SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat));
         }
 
         [Test]
@@ -92,7 +88,7 @@ namespace NotifierUnitTests
             _machine.Start();
 
             Assert.That(_machine.State, Is.EqualTo(NotifyState.TryPromoteToMaster));
-            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(ClaimMasterDelay));
+            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(NotifyStateMachine.SecondToWaitBetweenPreliminaryMasterAndMaster));
             _client.Received().AttemptToBecomeMaster();
         }
 
@@ -105,7 +101,7 @@ namespace NotifierUnitTests
 
             Assert.That(_machine.State, Is.EqualTo(NotifyState.PreliminaryMaster));
             _client.Received().Heartbeat();
-            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(HeartbeatDelay));
+            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(NotifyStateMachine.SecondsBetweenHeartbeats));
         }
 
         [Test]
@@ -116,7 +112,7 @@ namespace NotifierUnitTests
             _machine.Trigger();
 
             Assert.That(_machine.LastHeartbeat, Is.EqualTo(_now));
-            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(HeartbeatDelay));
+            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(NotifyStateMachine.SecondsBetweenHeartbeats));
         }
 
         [Test]
@@ -127,7 +123,7 @@ namespace NotifierUnitTests
             _machine.Trigger();
 
             Assert.That(_machine.State, Is.EqualTo(NotifyState.TryPromoteToMaster));
-            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(ClaimMasterDelay));
+            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(NotifyStateMachine.SecondToWaitBetweenPreliminaryMasterAndMaster));
         }
 
         [Test]
@@ -139,7 +135,7 @@ namespace NotifierUnitTests
 
             Assert.That(_machine.State, Is.EqualTo(NotifyState.Master));
             _client.Received().Heartbeat();
-            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(HeartbeatDelay));
+            _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(NotifyStateMachine.SecondsBetweenHeartbeats));
         }
     }
 }
