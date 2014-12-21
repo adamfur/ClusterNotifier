@@ -41,41 +41,37 @@ namespace Notifier
 
         public void AttemptToBecomeMaster()
         {
-            var message = new NotifyMessage
-            {
-                ApplicationId = _applicationId,
-                ApplicationInstanceId = _applicationInstanceId,
-                Type = EventType.PromoteSelf,
-                Started = _started
-            };
+            var message = CreateMessage(EventType.PromoteSelf);
+
             Send(message);
             Console.WriteLine("***AttemptToBecomeMaster***");
         }
 
         public void Heartbeat()
         {
-            var message = new NotifyMessage
-            {
-                ApplicationId = _applicationId,
-                ApplicationInstanceId = _applicationInstanceId,
-                Type = EventType.Heartbeat,
-                Started = _started
-            };
+            var message = CreateMessage(EventType.Heartbeat);
+
             Send(message);
             Console.WriteLine("***Heartbeat***");
         }
 
         public void Broadcast()
         {
-            var message = new NotifyMessage
+            var message = CreateMessage(EventType.Notify);
+
+            Send(message);
+            Console.WriteLine("***Broadcast***");
+        }
+
+        private NotifyMessage CreateMessage(EventType argEventType)
+        {
+            return new NotifyMessage
             {
                 ApplicationId = _applicationId,
                 ApplicationInstanceId = _applicationInstanceId,
-                Type = EventType.Notify,
+                Type = argEventType,
                 Started = _started
             };
-            Send(message);
-            Console.WriteLine("***Broadcast***");
         }
     }
 }
