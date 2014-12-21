@@ -93,7 +93,7 @@ namespace NotifierUnitTests
 
             Assert.That(_machine.State, Is.EqualTo(NotifyState.TryPromoteToMaster));
             _watchdog.Received().SetTimeout(TimeSpan.FromSeconds(ClaimMasterDelay));
-            _client.Received().PromoteSelf();
+            _client.Received().AttemptToBecomeMaster();
         }
 
         [Test]

@@ -8,7 +8,7 @@ namespace Notifier
 {
     public interface INotifyClient
     {
-        void PromoteSelf();
+        void AttemptToBecomeMaster();
         void Heartbeat();
         void Broadcast();
     }
@@ -39,7 +39,7 @@ namespace Notifier
             _udpclient.Send(buffer, buffer.Length, _remoteep);
         }
 
-        public void PromoteSelf()
+        public void AttemptToBecomeMaster()
         {
             var message = new NotifyMessage
             {
@@ -49,7 +49,7 @@ namespace Notifier
                 Started = _started
             };
             Send(message);
-            Console.WriteLine("***PromoteSelf***");
+            Console.WriteLine("***AttemptToBecomeMaster***");
         }
 
         public void Heartbeat()

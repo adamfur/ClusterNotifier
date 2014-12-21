@@ -54,7 +54,7 @@ namespace Notifier
         public void Start()
         {
             State = NotifyState.TryPromoteToMaster;
-            _client.PromoteSelf();
+            _client.AttemptToBecomeMaster();
             _watchdog.SetTimeout(TimeSpan.FromSeconds(ClaimMasterDelay));
             StateTimestamp = SystemTime.Now;
         }
@@ -76,7 +76,7 @@ namespace Notifier
             else if (State == NotifyState.Slave && LastHeartbeat.Add(TimeSpan.FromSeconds(HeartbeatDelay)) < SystemTime.Now)
             {
                 State = NotifyState.TryPromoteToMaster;
-                _client.PromoteSelf();
+                _client.AttemptToBecomeMaster();
                 _watchdog.SetTimeout(TimeSpan.FromSeconds(ClaimMasterDelay));
             }
             else if (State == NotifyState.PreliminaryMaster && LastHeartbeat.Add(TimeSpan.FromSeconds(HeartbeatDelay)) < SystemTime.Now)
