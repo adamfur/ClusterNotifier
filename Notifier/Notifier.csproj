@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EventType.cs" />
+    <Compile Include="IWatchdog.cs" />
     <Compile Include="Notify.cs" />
     <Compile Include="NotifyClient.cs" />
     <Compile Include="NotifyMessage.cs" />
