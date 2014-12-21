@@ -15,7 +15,7 @@ namespace Notifier
             get { return _state; }
             set
             {
-                Console.WriteLine("State: " + value.ToString());
+                Console.WriteLine("State: " + value);
                 _state = value;
             }
         }
@@ -43,14 +43,12 @@ namespace Notifier
             if (State == NotifyState.TryPromoteToMaster)
             {
                 State = NotifyState.Slave;
-                _watchdog.SetTimeout(TimeSpan.FromSeconds(SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat));
-
             }
             else if (State == NotifyState.PreliminaryMaster && argMessage.Started < _roll)
             {
                 State = NotifyState.Slave;
-                _watchdog.SetTimeout(TimeSpan.FromSeconds(SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat));
             }
+            _watchdog.SetTimeout(TimeSpan.FromSeconds(SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat));
         }
 
         public void Notify()
