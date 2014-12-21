@@ -10,11 +10,12 @@ namespace Notifier
         private readonly int _roll;
         private DateTime _promoteToMasterTimer;
         public NotifyState State { get; set; }
+        public DateTime StateTimestamp { get; set; }
+        public DateTime LastHeartbeat { get; set; }
+
         private const int ClaimMasterDelay = 5;
         private const int WaitSecondsIfNoHeartbeats = 10;
-        public DateTime StateTimestamp { get; set; }
         private const int HeartbeatDelay = 3;
-        public DateTime LastHeartbeat { get; set; }
 
         public NotifyStateMachine(IWatchdog argWatchdog, Action argAction, INotifyClient argClient, int argRoll)
         {

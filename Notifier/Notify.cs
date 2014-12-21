@@ -70,7 +70,7 @@ namespace Notifier
 
                         var message = _queue.Dequeue();
 
-                        if (message.ApplicationInstanceId == _applicationInstanceId || message.ApplicationId != _applicationId)
+                        if (MessageFromSelf(message) || !IsSameApplication(message))
                         {
                             continue;
                         }
@@ -90,6 +90,16 @@ namespace Notifier
                     }
                 }
             }
+        }
+
+        private bool IsSameApplication(NotifyMessage message)
+        {
+            return message.ApplicationId == _applicationId;
+        }
+
+        private bool MessageFromSelf(NotifyMessage message)
+        {
+            return message.ApplicationInstanceId == _applicationInstanceId;
         }
     }
 }
