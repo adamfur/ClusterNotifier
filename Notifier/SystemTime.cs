@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Prislistan.Framework
+namespace Notifier
 {
     public class SystemTime
     {
