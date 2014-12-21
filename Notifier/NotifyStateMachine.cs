@@ -13,8 +13,8 @@ namespace Notifier
         public DateTime StateTimestamp { get; set; }
         public DateTime LastHeartbeat { get; set; }
 
-        public const int SecondToWaitBetweenPreliminaryMasterAndMaster = 5;
-        public const int SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat = 10;
+        public const int SecondToWaitBetweenPreliminaryMasterAndMaster = 1;
+        public const int SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat = 4;
         public const int SecondsBetweenHeartbeats = 3;
 
         public NotifyStateMachine(IWatchdog argWatchdog, Action argAction, INotifyClient argClient, int argRoll)
@@ -73,7 +73,7 @@ namespace Notifier
                 _client.Heartbeat();
                 _watchdog.SetTimeout(TimeSpan.FromSeconds(SecondsBetweenHeartbeats));
             }
-            else if (State == NotifyState.Slave && LastHeartbeat.Add(TimeSpan.FromSeconds(SecondsBetweenHeartbeats)) <= SystemTime.Now)
+            else if (State == NotifyState.Slave && LastHeartbeat.Add(TimeSpan.FromSeconds(SecondToWaitBetweenPreliminaryMasterAndMaster)) <= SystemTime.Now)
             {
                 State = NotifyState.TryPromoteToMaster;
                 _client.AttemptToBecomeMaster();
