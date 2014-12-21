@@ -62,11 +62,6 @@ namespace Notifier
             }
         }
 
-        public void Broadcast()
-        {
-            _client.Broadcast();
-        }
-
         private void Run()
         {
             Console.WriteLine("Trying to become master, waiting 5 seconds to see if another one claims it.");
