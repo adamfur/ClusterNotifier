@@ -91,6 +91,7 @@ namespace Notifier
                         {
                             Console.WriteLine("Received heartbeat from master: " + message.ApplicationInstanceId);
                             _lastHeartbeat = SystemTime.Now;
+                            _watchdog.SetTimeout(TimeSpan.FromSeconds(WaitSecondsIfNoHeartbeats));
                         }
 
                         if (message.Type == EventType.Notify && _state == NotifyState.Master)
@@ -119,8 +120,9 @@ namespace Notifier
                             _client.Heartbeat();
                             _watchdog.SetTimeout(TimeSpan.FromSeconds(HeartbeatDelay));
                         }
-                        else if (_state == NotifyState.Master)
+                        else if (_state == NotifyState.Master && _lastHeartbeat.AddSeconds(HeartbeatDelay) < SystemTime.Now)
                         {
+                            _lastHeartbeat = SystemTime.Now;
                             _client.Heartbeat();
                             _watchdog.SetTimeout(TimeSpan.FromSeconds(HeartbeatDelay));
                         }

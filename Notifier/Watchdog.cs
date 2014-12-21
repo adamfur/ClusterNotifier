@@ -7,7 +7,7 @@ namespace Notifier
     {
         private readonly Thread _logic;
         private readonly Thread _thread;
-        private readonly PriorityQueue<DateTime, DateTime> _interruptTable = new PriorityQueue<DateTime, DateTime>();
+        private readonly IPriorityQueue<DateTime, DateTime> _interruptTable = new PriorityQueue<DateTime, DateTime>();
 
         public Watchdog(Thread argLogic)
         {
@@ -24,9 +24,11 @@ namespace Notifier
         {
             DateTime deadline = SystemTime.Now.Add(argTimeout);
 
+            Console.WriteLine("Set interrupt: " + deadline);
             lock (_interruptTable)
             {
                 _interruptTable.Enqueue(deadline, deadline);
+                Monitor.Pulse(_interruptTable);
             }
             _thread.Interrupt();
         }
@@ -37,22 +39,31 @@ namespace Notifier
             {
                 try
                 {
-                    DateTime dateTime = DateTime.MinValue;
+                    DateTime deadline = SystemTime.Now;
 
                     lock (_interruptTable)
                     {
-                        ConsumeExpiredDeadlines();
+                        while (_interruptTable.Empty)
+                        {
+                            Monitor.Wait(_interruptTable);
+                        }
+
+                        while (!_interruptTable.Empty && _interruptTable.Top < SystemTime.Now)
+                        {
+                            _interruptTable.Dequeue();
+                        }
 
                         if (!_interruptTable.Empty)
                         {
-                            dateTime = _interruptTable.Top;
+                            deadline = _interruptTable.Top;
                         }
                     }
 
-                    TimeSpan timeSpan = dateTime.Subtract(SystemTime.Now);
+                    TimeSpan timeSpan = deadline.Subtract(SystemTime.Now);
 
                     Wait(timeSpan);
                     _logic.Interrupt();
+                    Console.WriteLine("[interrupt]");
                 }
                 catch (ThreadInterruptedException)
                 {
@@ -65,18 +76,6 @@ namespace Notifier
             if (argTimeSpan > TimeSpan.Zero)
             {
                 Thread.Sleep(argTimeSpan);
-            }
-            else
-            {
-                Thread.Sleep(Timeout.Infinite);
-            }
-        }
-
-        private void ConsumeExpiredDeadlines()
-        {
-            while (!_interruptTable.Empty && _interruptTable.Top < SystemTime.Now)
-            {
-                _interruptTable.Dequeue();
             }
         }
     }
