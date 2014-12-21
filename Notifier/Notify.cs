@@ -132,7 +132,7 @@ namespace Notifier
                             _client.PromoteSelf();
                             _watchdog.SetTimeout(TimeSpan.FromSeconds(ClaimMasterDelay));
                         }
-                        else if (_state == NotifyState.PreliminaryMaster)
+                        else if (_state == NotifyState.PreliminaryMaster && _lastHeartbeat.AddSeconds(HeartbeatDelay) < SystemTime.Now)
                         {
                             Console.WriteLine("Master");
                             _state = NotifyState.Master;
