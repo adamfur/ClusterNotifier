@@ -6,7 +6,14 @@ using Newtonsoft.Json;
 
 namespace Notifier
 {
-    public class NotifyClient
+    public interface INotifyClient
+    {
+        void PromoteSelf();
+        void Heartbeat();
+        void Broadcast();
+    }
+
+    public class NotifyClient : INotifyClient
     {
         private readonly Guid _applicationId;
         private readonly Guid _applicationInstanceId;

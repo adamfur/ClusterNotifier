@@ -3,7 +3,13 @@ using System.Threading;
 
 namespace Notifier
 {
-    public class Watchdog
+    public interface IWatchdog
+    {
+        void Start();
+        void SetTimeout(TimeSpan argTimeout);
+    }
+
+    public class Watchdog : IWatchdog
     {
         private readonly Thread _logic;
         private readonly Thread _thread;
