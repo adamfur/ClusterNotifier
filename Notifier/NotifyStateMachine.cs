@@ -8,7 +8,7 @@ namespace Notifier
         private readonly IWatchdog _watchdog;
         private readonly INotifyClient _client;
         private readonly int _roll;
-        private DateTime _promoteToMasterTimer;
+        public DateTime PromoteToMasterTimer { get; set; }
         public NotifyState State { get; set; }
         public DateTime StateTimestamp { get; set; }
         public DateTime LastHeartbeat { get; set; }
@@ -33,7 +33,7 @@ namespace Notifier
             if (State == NotifyState.TryPromoteToMaster)
             {
                 State = NotifyState.Slave;
-                _promoteToMasterTimer = SystemTime.Now;
+                PromoteToMasterTimer = SystemTime.Now;
             }
             else if (State == NotifyState.PreliminaryMaster && argMessage.Started < _roll)
             {
@@ -61,25 +61,25 @@ namespace Notifier
 
         public void Trigger()
         {
-            if (State == NotifyState.TryPromoteToMaster && _promoteToMasterTimer.AddSeconds(SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat) < SystemTime.Now)
+            if (State == NotifyState.TryPromoteToMaster && PromoteToMasterTimer.AddSeconds(SecondsToWaitBeforeAttemptingBecomeMasterAfterHeartbeat) <= SystemTime.Now)
             {
                 State = NotifyState.PreliminaryMaster;
                 _client.Heartbeat();
                 _watchdog.SetTimeout(TimeSpan.FromSeconds(SecondsBetweenHeartbeats));
             }
-            else if (State == NotifyState.Master && LastHeartbeat.Add(TimeSpan.FromSeconds(SecondsBetweenHeartbeats)) < SystemTime.Now)
+            else if (State == NotifyState.Master && LastHeartbeat.Add(TimeSpan.FromSeconds(SecondsBetweenHeartbeats)) <= SystemTime.Now)
             {
                 LastHeartbeat = SystemTime.Now;
                 _client.Heartbeat();
                 _watchdog.SetTimeout(TimeSpan.FromSeconds(SecondsBetweenHeartbeats));
             }
-            else if (State == NotifyState.Slave && LastHeartbeat.Add(TimeSpan.FromSeconds(SecondsBetweenHeartbeats)) < SystemTime.Now)
+            else if (State == NotifyState.Slave && LastHeartbeat.Add(TimeSpan.FromSeconds(SecondsBetweenHeartbeats)) <= SystemTime.Now)
             {
                 State = NotifyState.TryPromoteToMaster;
                 _client.AttemptToBecomeMaster();
                 _watchdog.SetTimeout(TimeSpan.FromSeconds(SecondToWaitBetweenPreliminaryMasterAndMaster));
             }
-            else if (State == NotifyState.PreliminaryMaster && LastHeartbeat.Add(TimeSpan.FromSeconds(SecondsBetweenHeartbeats)) < SystemTime.Now)
+            else if (State == NotifyState.PreliminaryMaster && LastHeartbeat.Add(TimeSpan.FromSeconds(SecondsBetweenHeartbeats)) <= SystemTime.Now)
             {
                 State = NotifyState.Master;
                 _client.Heartbeat();

@@ -95,6 +95,7 @@ namespace NotifierUnitTests
         [Test]
         public void Trigger_IsTryPromoteToMaster_ExpectedResult()
         {
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondsBetweenHeartbeats));
             _machine.State = NotifyState.TryPromoteToMaster;
 
             _machine.Trigger();
@@ -107,6 +108,7 @@ namespace NotifierUnitTests
         [Test]
         public void Trigger_IsMaster_ExpectedResult()
         {
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondsBetweenHeartbeats));
             _machine.State = NotifyState.Master;
 
             _machine.Trigger();
@@ -118,6 +120,7 @@ namespace NotifierUnitTests
         [Test]
         public void Trigger_IsSlave_ExpectedResult()
         {
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondToWaitBetweenPreliminaryMasterAndMaster));
             _machine.State = NotifyState.Slave;
 
             _machine.Trigger();
@@ -129,6 +132,7 @@ namespace NotifierUnitTests
         [Test]
         public void Trigger_IsPreliminaryMaster_ExpectedResult()
         {
+            _machine.LastHeartbeat = SystemTime.Now.Add(-TimeSpan.FromSeconds(NotifyStateMachine.SecondsBetweenHeartbeats));
             _machine.State = NotifyState.PreliminaryMaster;
 
             _machine.Trigger();
