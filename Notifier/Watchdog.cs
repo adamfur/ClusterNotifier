@@ -79,12 +79,9 @@ namespace Notifier
 
         private static void Wait(TimeSpan argTimeSpan)
         {
-            try
-            {
+            if (argTimeSpan > TimeSpan.Zero)
+            { 
                 Thread.Sleep(argTimeSpan);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
             }
         }
     }
