@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Notifier
 {
-    public class Notify
+    public class Notify : IWatchdogEventReceiver
     {
         private readonly int _started = new Random().Next();
         private readonly Guid _applicationId = Guid.Parse("E94A2C93-BE87-4E0D-A295-1E764DFA4D7A");
@@ -21,7 +21,7 @@ namespace Notifier
             _listener = new Thread(Listen);
             _logic = new Thread(Run);
             INotifyClient client = new NotifyClient(_applicationId, _applicationInstanceId, _started);
-            _watchdog = new Watchdog(_logic);
+            _watchdog = new Watchdog(this);
             _stateMachine = new NotifyStateMachine(_watchdog, argAction, client, _started);
         }
 
@@ -61,45 +61,53 @@ namespace Notifier
             {
                 while (true)
                 {
-                    try
+                    while (_queue.Count == 0)
                     {
-                        while (_queue.Count == 0)
-                        {
-                            Monitor.Wait(_queue);
-                        }
-
-                        var message = _queue.Dequeue();
-
-                        if (IsMessageFromSelf(message) || !IsSameApplication(message))
-                        {
-                            continue;
-                        }
-
-                        if (message.Type == EventType.Heartbeat)
-                        {
-                            _stateMachine.Heartbeat(message);
-                        }
-                        else if (message.Type == EventType.Notify)
-                        {
-                            _stateMachine.Notify();
-                        }
+                        Monitor.Wait(_queue);
                     }
-                    catch (ThreadInterruptedException)
+
+                    var message = _queue.Dequeue();
+
+                    if (message == null)
                     {
                         _stateMachine.Trigger();
+                        continue;
+                    }
+
+                    if (IsMessageFromSelf(message) || !IsSameApplication(message))
+                    {
+                        continue;
+                    }
+
+                    if (message.Type == EventType.Heartbeat)
+                    {
+                        _stateMachine.Heartbeat(message);
+                    }
+                    else if (message.Type == EventType.Notify)
+                    {
+                        _stateMachine.Notify();
                     }
                 }
             }
         }
 
-        private bool IsSameApplication(NotifyMessage message)
+        private bool IsSameApplication(NotifyMessage argMessage)
         {
-            return message.ApplicationId == _applicationId;
+            return argMessage.ApplicationId == _applicationId;
         }
 
-        private bool IsMessageFromSelf(NotifyMessage message)
+        private bool IsMessageFromSelf(NotifyMessage argMessage)
         {
-            return message.ApplicationInstanceId == _applicationInstanceId;
+            return argMessage.ApplicationInstanceId == _applicationInstanceId;
+        }
+
+        public void Interrupt()
+        {
+            lock (_queue)
+            {
+                _queue.Enqueue(null);
+                Monitor.Pulse(_queue);
+            }
         }
     }
 }

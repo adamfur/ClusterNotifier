@@ -3,13 +3,18 @@ using System.Threading;
 
 namespace Notifier
 {
+    public interface IWatchdogEventReceiver
+    {
+        void Interrupt();
+    }
+
     public class Watchdog : IWatchdog
     {
-        private readonly Thread _logic;
+        private readonly IWatchdogEventReceiver _logic;
         private readonly Thread _thread;
         private readonly IPriorityQueue<DateTime, DateTime> _interruptTable = new PriorityQueue<DateTime, DateTime>();
 
-        public Watchdog(Thread argLogic)
+        public Watchdog(IWatchdogEventReceiver argLogic)
         {
             _logic = argLogic;
             _thread = new Thread(Run);
@@ -24,7 +29,7 @@ namespace Notifier
         {
             DateTime deadline = SystemTime.Now.Add(argTimeout);
 
-            //Console.WriteLine("Set interrupt: " + deadline);
+            Log("Set interrupt: " + deadline);
             lock (_interruptTable)
             {
                 _interruptTable.Enqueue(deadline, deadline);
@@ -63,7 +68,7 @@ namespace Notifier
 
                     Wait(timeSpan);
                     _logic.Interrupt();
-                    //Console.WriteLine("[interrupt]");
+                    Log("[interrupt]");
                 }
                 catch (ThreadInterruptedException)
                 {
@@ -77,6 +82,11 @@ namespace Notifier
             { 
                 Thread.Sleep(argTimeSpan);
             }
+        }
+
+        private static void Log(string argText)
+        {
+            Console.WriteLine("{0}: {1}", SystemTime.Now, argText);
         }
     }
 }
