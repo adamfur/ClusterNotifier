@@ -55,7 +55,6 @@
     <Compile Include="NotifyServer.cs" />
     <Compile Include="NotifyState.cs" />
     <Compile Include="NotifyStateMachine.cs" />
-    <Compile Include="PriorityQueue.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemTime.cs" />
